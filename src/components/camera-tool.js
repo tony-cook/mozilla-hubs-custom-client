@@ -584,6 +584,7 @@ AFRAME.registerComponent("camera-tool", {
       if (this.trackTarget) {
         if (this.trackTarget.parentNode) {
           this.lookAt(this.trackTarget);
+          this.object3D.updateMatrixWorld();
         } else {
           this.trackTarget = null; // Target removed
         }
@@ -620,12 +621,15 @@ AFRAME.registerComponent("camera-tool", {
           // HACK, bone visibility typically takes a tick to update, but since we want to be able
           // to have enable() and disable() be reflected this frame, we need to do it immediately.
           boneVisibilitySystem.tick();
+          boneVisibilitySystem.updateMatrices();
         }
 
         const tmpVRFlag = renderer.xr.enabled;
         const tmpOnAfterRender = sceneEl.object3D.onAfterRender;
+        const tmpAutoUpdate = sceneEl.object3D.autoUpdate;
         delete sceneEl.object3D.onAfterRender;
         renderer.xr.enabled = false;
+        sceneEl.object3D.autoUpdate = false;
 
         if (allowVideo && this.videoRecorder && !this.videoRenderTarget) {
           // Create a separate render target for video because we need to flip and (sometimes) downscale it before
@@ -649,6 +653,7 @@ AFRAME.registerComponent("camera-tool", {
 
         renderer.xr.enabled = tmpVRFlag;
         sceneEl.object3D.onAfterRender = tmpOnAfterRender;
+        sceneEl.object3D.autoUpdate = tmpAutoUpdate;
 
         if (this.playerHud) {
           this.playerHud.visible = playerHudWasVisible;
@@ -666,6 +671,7 @@ AFRAME.registerComponent("camera-tool", {
           // HACK, bone visibility typically takes a tick to update, but since we want to be able
           // to have enable() and disable() be reflected this frame, we need to do it immediately.
           boneVisibilitySystem.tick();
+          boneVisibilitySystem.updateMatrices();
         }
 
         this.lastUpdate = now;
